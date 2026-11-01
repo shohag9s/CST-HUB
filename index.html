@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMT Student Directory System</title>
+    
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS File -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-laptop-code brand-icon"></i>
+                <div>
+                    <h2>CST Hub</h2>
+                    <span class="sub-brand">Computer Technology</span>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-item active" onclick="switchTab('list')">
+                    <i class="fa-solid fa-users"></i> <span>শিক্ষার্থী তালিকা</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('add')">
+                    <i class="fa-solid fa-user-plus"></i> <span>নতুন স্টুডেন্ট</span>
+                </button>
+                <button class="nav-item" onclick="switchTab('attendance')">
+                    <i class="fa-solid fa-calendar-check"></i> <span>উপস্থিতি ট্র্যাকার</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="theme-toggle-btn" onclick="toggleDarkMode()">
+                    <i class="fa-solid fa-moon" id="theme-icon"></i> <span id="theme-text">ডার্ক মোড</span>
+                </button>
+                <p><i class="fa-solid fa-shield-halved"></i> Data auto-saved</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div>
+                    <h1 id="page-title">কম্পিউটার টেকনোলজি শিক্ষার্থী ডিরেক্টরি</h1>
+                    <p class="subtitle">কম্পিউটার বিভাগের সকল সেমিস্টারের শিক্ষার্থীদের তথ্য পরিচালনা</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" onclick="loadSampleData()">
+                        <i class="fa-solid fa-database"></i> স্যাম্পল ডেটা
+                    </button>
+                    <label class="btn btn-outline file-input-label">
+                        <i class="fa-solid fa-file-import"></i> JSON ইমপোর্ট
+                        <input type="file" id="import-file" accept=".json" onchange="importJSON(event)" style="display:none;">
+                    </label>
+                    <button class="btn btn-secondary" onclick="exportJSON()">
+                        <i class="fa-solid fa-file-export"></i> ব্যাকআপ (JSON)
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportCSV()">
+                        <i class="fa-solid fa-file-csv"></i> CSV এক্সপোর্ট
+                    </button>
+                    <button class="btn btn-primary" onclick="resetForm(); switchTab('add');">
+                        <i class="fa-solid fa-plus"></i> নতুন যোগ করুন
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB 1: STUDENT LIST VIEW -->
+            <section id="tab-list" class="tab-content active">
+                <!-- Dashboard Analytics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon icon-blue"><i class="fa-solid fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3>মোট শিক্ষার্থী (CMT)</h3>
+                            <span class="stat-number" id="stat-total">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-green"><i class="fa-solid fa-sun"></i></div>
+                        <div class="stat-info">
+                            <h3>১ম শিফট</h3>
+                            <span class="stat-number" id="stat-shift1">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon icon-purple"><i class="fa-solid fa-moon"></i></div>
+                        <div class="stat-info">
+                            <h3>২য় শিফট</h3>
+                            <span class="stat-number" id="stat-shift2">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search & Filters Toolbar -->
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="search-input" placeholder="নাম, রোল বা রেজিঃ দিয়ে খুঁজুন..." oninput="filterStudents()">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <select id="filter-semester" onchange="filterStudents()">
+                            <option value="">সকল সেমিস্টার</option>
+                            <option value="1st">১ম সেমিস্টার</option>
+                            <option value="2nd">২য় সেমিস্টার</option>
+                            <option value="3rd">৩য় সেমিস্টার</option>
+                            <option value="4th">৪র্থ সেমিস্টার</option>
+                            <option value="5th">৫ম সেমিস্টার</option>
+                            <option value="6th">৬ষ্ঠ সেমিস্টার</option>
+                            <option value="7th">৭ম সেমিস্টার</option>
+                            <option value="8th">৮ম সেমিস্টার</option>
+                        </select>
+
+                        <select id="filter-shift" onchange="filterStudents()">
+                            <option value="">সকল শিফট</option>
+                            <option value="1st Shift">১ম শিফট</option>
+                            <option value="2nd Shift">২য় শিফট</option>
+                        </select>
+
+                        <div class="view-toggle">
+                            <button id="view-grid-btn" class="active" onclick="setViewMode('grid')" title="গ্রিড ভিউ"><i class="fa-solid fa-border-all"></i></button>
+                            <button id="view-table-btn" onclick="setViewMode('table')" title="টেবিল ভিউ"><i class="fa-solid fa-table-list"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Container for Cards / Table -->
+                <div id="students-container" class="grid-view"></div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="empty-state hidden">
+                    <i class="fa-solid fa-folder-open empty-icon"></i>
+                    <h3>কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি!</h3>
+                    <p>অনুগ্রহ করে সার্চ বা ফিল্টার পরিবর্তন করুন অথবা নতুন তথ্য যোগ করুন।</p>
+                </div>
+            </section>
+
+            <!-- TAB 2: ADD / EDIT STUDENT FORM -->
+            <section id="tab-add" class="tab-content">
+                <div class="card form-card">
+                    <div class="form-header">
+                        <h2 id="form-title">কম্পিউটার বিভাগের নতুন স্টুডেন্ট রেজিস্ট্রেশন</h2>
+                        <p>সঠিক তথ্য দিয়ে ফর্মটি পূরণ করুন</p>
+                    </div>
+
+                    <form id="student-form" onsubmit="handleFormSubmit(event)">
+                        <input type="hidden" id="student-id">
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="student-name">শিক্ষার্থীর নাম <span class="required">*</span></label>
+                                <input type="text" id="student-name" placeholder="যেমন: গাজী শাহরিয়ার" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-roll">রোল নম্বর <span class="required">*</span></label>
+                                <input type="number" id="student-roll" placeholder="যেমন: 654321" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-reg">রেজিস্ট্রেশন নম্বর <span class="required">*</span></label>
+                                <input type="number" id="student-reg" placeholder="যেমন: 1502012345" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-semester">সেমিস্টার <span class="required">*</span></label>
+                                <select id="student-semester" required>
+                                    <option value="" disabled selected>সেমিস্টার নির্বাচন করুন</option>
+                                    <option value="1st">১ম সেমিস্টার</option>
+                                    <option value="2nd">২য় সেমিস্টার</option>
+                                    <option value="3rd">৩য় সেমিস্টার</option>
+                                    <option value="4th">৪র্থ সেমিস্টার</option>
+                                    <option value="5th">৫ম সেমিস্টার</option>
+                                    <option value="6th">৬ষ্ঠ সেমিস্টার</option>
+                                    <option value="7th">৭ম সেমিস্টার</option>
+                                    <option value="8th">৮ম সেমিস্টার</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-shift">শিফট</label>
+                                <select id="student-shift">
+                                    <option value="1st Shift">১ম শিফট</option>
+                                    <option value="2nd Shift">২য় শিফট</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-group">ল্যাব / সেকশন গ্রুপ</label>
+                                <select id="student-group">
+                                    <option value="Group A">Group A</option>
+                                    <option value="Group B">Group B</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-phone">মোবাইল নম্বর</label>
+                                <input type="tel" id="student-phone" placeholder="যেমন: 01700000000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-blood">রক্তের গ্রুপ</label>
+                                <select id="student-blood">
+                                    <option value="N/A">জানা নেই</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-cgpa">বর্তমান GPA/CGPA</label>
+                                <input type="number" step="0.01" min="0" max="4.00" id="student-cgpa" placeholder="যেমন: 3.85">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-github">GitHub / Portfolio লিঙ্ক</label>
+                                <input type="url" id="student-github" placeholder="https://github.com/username">
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline" onclick="resetForm(); switchTab('list');">বাতিল করুন</button>
+                            <button type="submit" class="btn btn-primary" id="save-btn"><i class="fa-solid fa-check"></i> সংরক্ষণ করুন</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 3: ATTENDANCE TRACKER -->
+            <section id="tab-attendance" class="tab-content">
+                <div class="card">
+                    <div class="toolbar" style="margin-bottom:20px;">
+                        <div>
+                            <h2>কম্পিউটার বিভাগ - দৈনিক উপস্থিতি রেজিস্টার</h2>
+                            <p class="subtitle">শিক্ষার্থীদের উপস্থিতি এবং অনুপস্থিতি চিহ্নিত করুন</p>
+                        </div>
+                        <div class="filter-group">
+                            <input type="date" id="attendance-date" class="date-picker" onchange="renderAttendanceTable()">
+                            <button class="btn btn-primary" onclick="saveAttendance()"><i class="fa-solid fa-floppy-disk"></i> সেভ করুন</button>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x:auto;">
+                        <table class="table-view">
+                            <thead>
+                                <tr>
+                                    <th>রোল</th>
+                                    <th>নাম</th>
+                                    <th>সেমিস্টার</th>
+                                    <th>শিফট & গ্রুপ</th>
+                                    <th>উপস্থিতি অবস্থা</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendance-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Student Detail Profile Modal -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content card">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modal-body-content"></div>
+            <div class="modal-actions" style="margin-top:20px; text-align:right;">
+                <button class="btn btn-primary" onclick="window.print()"><i class="fa-solid fa-print"></i> প্রিন্ট / PDF</button>
+                <button class="btn btn-outline" onclick="closeModal()">বন্ধ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check toast-icon"></i>
+        <span id="toast-message">সফলভাবে সম্পন্ন হয়েছে!</span>
+    </div>
+
+    <!-- Custom JavaScript File -->
+    <script src="script.js"></script>
+</body>
+</html>
